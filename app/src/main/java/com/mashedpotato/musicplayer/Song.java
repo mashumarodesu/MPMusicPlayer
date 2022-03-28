@@ -1,4 +1,4 @@
-package com.example.musicplayer;
+package com.mashedpotato.musicplayer;
 
 import java.io.Serializable;
 
