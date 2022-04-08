@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MusicPlayer</string>
+    <string name="notificationMediaPlayer">"Media Player"</string>
+    <string name="notificationMediaPlayerDescription">Display the media player in your notifications</string>
 </resources>

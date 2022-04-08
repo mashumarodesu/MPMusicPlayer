@@ -8,12 +8,16 @@ public class Song implements Serializable {
     private String title;
     private String album;
     private String artist;
+    private String genre;
+    private String trackNum;
 
-    public Song(String data, String title, String album, String artist) {
+    public Song(String data, String title, String album, String artist, String genre, String trackNum) {
         this.data = data;
         this.title = title;
         this.album = album;
         this.artist = artist;
+        this.genre = genre;
+        this.trackNum = trackNum;
     }
 
     public String getData() {
@@ -46,5 +50,21 @@ public class Song implements Serializable {
 
     public void setArtist(String artist) {
         this.artist = artist;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public String getTrackNum() {
+        return trackNum;
+    }
+
+    public void setTrackNum(String trackNum) {
+        this.trackNum = trackNum;
     }
 }
