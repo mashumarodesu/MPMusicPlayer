@@ -2,6 +2,7 @@ package com.mashedpotato.musicplayer;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -11,13 +12,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -31,7 +38,15 @@ public class MainActivity extends AppCompatActivity {
 
     private MediaPlayerService player;
     boolean serviceBound = false;
-    ArrayList<Song> songsList;
+    public ArrayList<Song> songsList;
+
+    private RelativeLayout homeRL;
+    private TextInputEditText songEdt;
+    private ImageView searchIV;
+    private RecyclerView songRV;
+    private TextView songTV, artistTV;
+
+    private Adapter adapter;
 
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.mashedpotato.musicplayer.PlayNewAudio";
 
@@ -39,8 +54,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        homeRL = findViewById(R.id.idRLHome);
+        songEdt = findViewById(R.id.idEdtSong);
+        searchIV = findViewById(R.id.idIVSearch);
+        songRV = findViewById(R.id.idRVSong);
+        songTV = findViewById(R.id.idTVSong);
+        artistTV = findViewById(R.id.idTVArtist);
 
         loadAudio();
+
+        adapter = new Adapter(this, songsList);
+        songRV.setAdapter(adapter);
+
+        searchIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String song = songEdt.getText().toString();
+                if(song.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Enter a song here >:^l", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     // Check if permission is granted or not
