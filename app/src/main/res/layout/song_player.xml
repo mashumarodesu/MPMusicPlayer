@@ -104,7 +104,7 @@
                 android:layout_height="69dp"
                 android:id="@+id/idBForward"
                 android:layout_toRightOf="@+id/idBPlay"
-                android:background="@drawable/ic_baseline_fast_forward_24"
+                android:background="@drawable/ic_baseline_repeat_24"
                 />
 
             <Button
@@ -120,7 +120,7 @@
                 android:layout_height="69dp"
                 android:id="@+id/idBRewind"
                 android:layout_toLeftOf="@id/idBPlay"
-                android:background="@drawable/ic_baseline_fast_rewind_24"
+                android:background="@drawable/ic_baseline_shuffle_24"
                 />
 
             <Button

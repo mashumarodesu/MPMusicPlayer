@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         songTV = findViewById(R.id.idTVSong);
         artistTV = findViewById(R.id.idTVArtist);
 
+        runtimePerm();
         loadAudio();
 
         songRV.setHasFixedSize(true);
@@ -85,24 +87,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Check if permission is granted or not
-//    public void runtimePerm() {
-//        Dexter.withContext(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE).withListener(new PermissionListener() {
-//            @Override
-//            public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-//
-//            }
-//
-//            @Override
-//            public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-//
-//            }
-//
-//            @Override
-//            public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-//                permissionToken.continuePermissionRequest();
-//            }
-//        }).check();
-//    }
+    public void runtimePerm() {
+        Dexter.withContext(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE).withListener(new PermissionListener() {
+            @Override
+            public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+
+            }
+
+            @Override
+            public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+                permissionToken.continuePermissionRequest();
+            }
+        }).check();
+    }
 
     // Search the storage for songs
     @RequiresApi(api = Build.VERSION_CODES.R)
