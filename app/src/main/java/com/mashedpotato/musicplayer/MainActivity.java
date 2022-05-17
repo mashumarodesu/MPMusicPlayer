@@ -2,6 +2,7 @@ package com.mashedpotato.musicplayer;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView songTV, artistTV;
 
     private Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.mashedpotato.musicplayer.PlayNewAudio";
 
@@ -65,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
 
         loadAudio();
 
+        songRV.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(this);
+        songRV.setLayoutManager(layoutManager);
         adapter = new Adapter(this, songsList);
         songRV.setAdapter(adapter);
 

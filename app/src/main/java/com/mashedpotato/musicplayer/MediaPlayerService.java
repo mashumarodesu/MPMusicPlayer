@@ -51,7 +51,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final IBinder iBinder = new LocalBinder();
 
     // List of available Audio files
-    private ArrayList<Song> songList;
+    private ArrayList<Song> songList;    // changed to public
     private int songIndex = -1;
     private Song activeSong; // currently playing song
 
@@ -69,6 +69,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     //AudioPlayer notification ID
     private static final int NOTIFICATION_ID = 101;
+
+    public ArrayList<Song> getSongList() {
+        return this.songList;
+    }
+
+    public void setSongList(ArrayList<Song> songList) {
+        this.songList = songList;
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
