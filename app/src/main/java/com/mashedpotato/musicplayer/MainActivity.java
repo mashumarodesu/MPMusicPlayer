@@ -73,15 +73,15 @@ public class MainActivity extends AppCompatActivity {
         adapter = new Adapter(this, songsList);
         songRV.setAdapter(adapter);
 
-        searchIV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String song = songEdt.getText().toString();
-                if(song.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Enter a song here >:^l", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+//        searchIV.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                String song = songEdt.getText().toString();
+//                if(song.isEmpty()) {
+//                    Toast.makeText(MainActivity.this, "Enter a song here >:^l", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
     }
 
     // Check if permission is granted or not

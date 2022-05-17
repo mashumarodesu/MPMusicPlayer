@@ -20,12 +20,15 @@ interface ItemClickListener {
 class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener
 {
     public LinearLayout playerLL;
+    public TextView songTV, artistTV;
 
     private ItemClickListener itemClickListener;
 
     public RecyclerViewHolder(View itemView) {
         super(itemView);
         playerLL = (LinearLayout)itemView.findViewById(R.id.idLLPlayer);
+        songTV = itemView.findViewById(R.id.idTVSong);
+        artistTV = itemView.findViewById(R.id.idTVArtist);
         itemView.setOnClickListener(this);
         itemView.setOnLongClickListener(this);
     }
@@ -68,8 +71,8 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerViewHolder holder, int position) {
         Song song = songList.get(position);
-//        holder.songTV.setText(song.getTitle());
-//        holder.artistTV.setText(song.getArtist());
+        holder.songTV.setText(song.getTitle());
+        holder.artistTV.setText(song.getArtist());
 
         holder.setItemClickListener(new ItemClickListener() {
             @Override
@@ -85,15 +88,5 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
     @Override
     public int getItemCount() {
         return songList.size();
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView songTV, artistTV;
-
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            songTV = itemView.findViewById(R.id.idTVSong);
-            artistTV = itemView.findViewById(R.id.idTVArtist);
-        }
     }
 }
