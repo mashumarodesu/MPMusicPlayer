@@ -1,6 +1,7 @@
 package com.mashedpotato.musicplayer;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +65,7 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
     @Override
     public RecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.song_player, parent, false);
+        View view = inflater.inflate(R.layout.song_list, parent, false);
         return new RecyclerViewHolder(view);
     }
 
