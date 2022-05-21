@@ -33,8 +33,16 @@ import java.util.ArrayList;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
-
         AudioManager.OnAudioFocusChangeListener {
+
+    static MediaPlayer instance;
+
+    public static MediaPlayer getInstance() {
+        if (instance == null) {
+            instance = new MediaPlayer();
+        }
+        return instance;
+    }
 
     private static final String CHANNEL_ID = "mpNotiPlayer";
     private MediaPlayer mediaPlayer;
@@ -51,8 +59,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final IBinder iBinder = new LocalBinder();
 
     // List of available Audio files
-    private ArrayList<Song> songList;    // changed to public
-    private int songIndex = -1;
+    private ArrayList<Song> songList;
+    public static int songIndex = -1; // song position
     private Song activeSong; // currently playing song
 
     // Media control
@@ -141,7 +149,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         mediaPlayer.prepareAsync();
     }
 
-    private void playMedia() {
+    public void playMedia() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
         }

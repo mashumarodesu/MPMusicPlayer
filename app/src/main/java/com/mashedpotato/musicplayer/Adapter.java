@@ -1,6 +1,7 @@
 package com.mashedpotato.musicplayer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,10 +79,18 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
         holder.setItemClickListener(new ItemClickListener() {
             @Override
             public void onClick(View view, int position, boolean isLongClick) {
-                if(isLongClick)
-                    Toast.makeText(context, "Long Click: "+ songList.get(position), Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(context, " "+songList.get(position), Toast.LENGTH_SHORT).show();
+                if(isLongClick) {
+                    Toast.makeText(context, "Long Click: " + songList.get(position), Toast.LENGTH_SHORT).show();
+                } else {
+//                    Toast.makeText(context, " "+songList.get(position), Toast.LENGTH_SHORT).show();
+
+                    MediaPlayerService.getInstance().reset();
+                    MediaPlayerService.songIndex = position;
+                    Intent intent = new Intent(context, PlayerActivity.class);
+                    intent.putExtra("List", songList);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                }
             }
         });
     }

@@ -2,11 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/idLLPlayer"
     android:orientation="vertical"
     android:background="@drawable/list_background"
     android:weightSum="10"
-    >
+    tools:context=".PlayerActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,14 +20,14 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/idTVPlayerSong"
+            android:id="@+id/idTVSongPlaying"
             android:layout_margin="20dp"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
             android:padding="10dp"
             android:singleLine="true"
             android:text="Loading song..."
-            android:textSize="20dp"
+            android:textSize="20sp"
             android:textAlignment="center"
             android:textStyle="italic"
             />
@@ -55,7 +56,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/idTVRunTime"
+                android:id="@+id/idTVCurrentTime"
                 android:layout_toLeftOf="@+id/idSBBar"
                 android:layout_centerInParent="true"
                 android:layout_alignParentLeft="false"
@@ -68,7 +69,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/idTVEndTime"
+                android:id="@+id/idTVTotalTime"
                 android:layout_toRightOf="@+id/idSBBar"
                 android:layout_centerInParent="true"
                 android:layout_alignParentLeft="false"
@@ -92,44 +93,39 @@
             android:layout_height="match_parent">
 
             <Button
-                android:layout_width="69dp"
-                android:layout_height="69dp"
                 android:id="@+id/idBPlay"
+                android:layout_width="69dp"
+                android:layout_height="69dp"
                 android:layout_centerHorizontal="true"
-                android:background="@drawable/ic_baseline_pause_24"
-                />
+                android:background="@drawable/ic_baseline_pause_24" />
 
             <Button
+                android:id="@+id/idBRepeat"
                 android:layout_width="69dp"
                 android:layout_height="69dp"
-                android:id="@+id/idBForward"
                 android:layout_toRightOf="@+id/idBPlay"
-                android:background="@drawable/ic_baseline_repeat_24"
-                />
+                android:background="@drawable/ic_baseline_repeat_24" />
 
             <Button
-                android:layout_width="69dp"
-                android:layout_height="69dp"
                 android:id="@+id/idBNext"
-                android:layout_toRightOf="@+id/idBForward"
-                android:background="@drawable/ic_baseline_skip_next_24"
-                />
-
-            <Button
                 android:layout_width="69dp"
                 android:layout_height="69dp"
-                android:id="@+id/idBRewind"
+                android:layout_toRightOf="@+id/idBRepeat"
+                android:background="@drawable/ic_baseline_skip_next_24" />
+
+            <Button
+                android:id="@+id/idBShuffle"
+                android:layout_width="69dp"
+                android:layout_height="69dp"
                 android:layout_toLeftOf="@id/idBPlay"
-                android:background="@drawable/ic_baseline_shuffle_24"
-                />
+                android:background="@drawable/ic_baseline_shuffle_24" />
 
             <Button
+                android:id="@+id/idBPrevious"
                 android:layout_width="69dp"
                 android:layout_height="69dp"
-                android:id="@+id/idBPrevious"
-                android:layout_toLeftOf="@+id/idBRewind"
-                android:background="@drawable/ic_baseline_skip_previous_24"
-                />
+                android:layout_toLeftOf="@+id/idBShuffle"
+                android:background="@drawable/ic_baseline_skip_previous_24" />
 
         </RelativeLayout>
 

@@ -125,9 +125,10 @@ public class MainActivity extends AppCompatActivity {
                 @SuppressLint("Range") String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
                 @SuppressLint("Range") String genre = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.GENRE));
                 @SuppressLint("Range") String trackNum = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TRACK));
+                @SuppressLint("Range") String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
 
                 // Save to audioList
-                songsList.add(new Song(data, title, album, artist, genre, trackNum));
+                songsList.add(new Song(data, title, album, artist, genre, trackNum, duration));
             }
 
             cursor.close();
@@ -173,6 +174,14 @@ public class MainActivity extends AppCompatActivity {
             unbindService(serviceConnection);
             //service is active
             player.stopSelf();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (songRV != null) {
+            songRV.setAdapter( new Adapter(getApplicationContext(), songsList));
         }
     }
 
