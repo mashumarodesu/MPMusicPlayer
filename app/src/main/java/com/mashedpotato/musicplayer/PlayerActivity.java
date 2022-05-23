@@ -1,6 +1,7 @@
 package com.mashedpotato.musicplayer;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -51,12 +53,13 @@ public class PlayerActivity extends AppCompatActivity {
             public void run() {
                 if (mediaPlayer != null) {
                     seekBarSB.setProgress(mediaPlayer.getCurrentPosition());
-                    currentTimeTV.setText(convertTime(mediaPlayer.getCurrentPosition() + ""));
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("mm:ss");
+                    currentTimeTV.setText(timeFormat.format(mediaPlayer.getCurrentPosition()));
 
                     if (mediaPlayer.isPlaying()) {
-                        playB.setBackground(getDrawable(R.drawable.ic_baseline_pause_24));
+                        playB.setBackgroundResource(R.drawable.ic_baseline_pause_24);
                     } else {
-                        playB.setBackground(getDrawable(R.drawable.ic_baseline_play_24));
+                        playB.setBackgroundResource(R.drawable.ic_baseline_play_24);
                     }
                 }
                 new Handler().postDelayed(this, 100);
@@ -98,14 +101,14 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void playSong() {
         mediaPlayer.reset();
-        try {
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            seekBarSB.setProgress(0);
-            seekBarSB.setMax(mediaPlayer.getDuration());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            mediaPlayer.prepare();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        mediaPlayer.start();
+        seekBarSB.setProgress(0);
+        seekBarSB.setMax(mediaPlayer.getDuration());
     }
 
     private void pauseSong() {

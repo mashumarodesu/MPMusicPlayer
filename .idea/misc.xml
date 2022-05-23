@@ -5,7 +5,9 @@
       <map>
         <entry key="..\:/Coding/Git File/GitHub/MPMusicPlayer/app/src/main/res/drawable/cover.xml" value="0.2675" />
         <entry key="..\:/Coding/Git File/GitHub/MPMusicPlayer/app/src/main/res/drawable/ic_baseline_pause_24.xml" value="0.2675" />
-        <entry key="..\:/Coding/Git File/GitHub/MPMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.2563405797101449" />
+        <entry key="..\:/Coding/Git File/GitHub/MPMusicPlayer/app/src/main/res/drawable/ic_baseline_repeat_one_24.xml" value="0.1445" />
+        <entry key="..\:/Coding/Git File/GitHub/MPMusicPlayer/app/src/main/res/drawable/progress_bar.xml" value="0.1445" />
+        <entry key="..\:/Coding/Git File/GitHub/MPMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/Coding/Git File/GitHub/MPMusicPlayer/app/src/main/res/layout/activity_player.xml" value="0.358695652173913" />
         <entry key="..\:/Coding/Git File/GitHub/MPMusicPlayer/app/src/main/res/layout/song_player.xml" value="0.2563405797101449" />
         <entry key="..\:/Users/Administrator/AndroidStudioProjects/MusicPlayer/app/src/main/res/drawable/cover.xml" value="0.361" />

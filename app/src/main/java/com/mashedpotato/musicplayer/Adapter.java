@@ -83,7 +83,6 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
                     Toast.makeText(context, "Long Click: " + songList.get(position), Toast.LENGTH_SHORT).show();
                 } else {
 //                    Toast.makeText(context, " "+songList.get(position), Toast.LENGTH_SHORT).show();
-
                     MediaPlayerService.getInstance().reset();
                     MediaPlayerService.songIndex = position;
                     Intent intent = new Intent(context, PlayerActivity.class);
@@ -97,6 +96,11 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
     @Override
     public int getItemCount() {
-        return songList.size();
+        try {
+            return songList.size();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 }

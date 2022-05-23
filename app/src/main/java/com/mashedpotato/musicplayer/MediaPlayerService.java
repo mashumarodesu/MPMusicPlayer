@@ -35,7 +35,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
         AudioManager.OnAudioFocusChangeListener {
 
-    static MediaPlayer instance;
+    public static MediaPlayer instance;
 
     public static MediaPlayer getInstance() {
         if (instance == null) {
@@ -59,8 +59,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final IBinder iBinder = new LocalBinder();
 
     // List of available Audio files
-    private ArrayList<Song> songList;
     public static int songIndex = -1; // song position
+    private ArrayList<Song> songList;
     private Song activeSong; // currently playing song
 
     // Media control

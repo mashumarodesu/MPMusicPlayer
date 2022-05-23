@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                 @SuppressLint("Range") String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                 @SuppressLint("Range") String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                @SuppressLint("Range") String genre = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.GENRE));
+                @SuppressLint("Range") String genre = "0";
                 @SuppressLint("Range") String trackNum = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TRACK));
                 @SuppressLint("Range") String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
 
