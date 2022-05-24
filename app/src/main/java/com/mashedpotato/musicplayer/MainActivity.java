@@ -21,6 +21,7 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,18 +36,21 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
 
     private MediaPlayerService player;
     boolean serviceBound = false;
-    public ArrayList<Song> songsList;
+    public ArrayList<Song> songList;
+    private ArrayList<Song> songListOrigin;
 
     private RelativeLayout homeRL;
     private TextInputEditText songEdt;
     private ImageView searchIV;
     private RecyclerView songRV;
     private TextView songTV, artistTV;
+    private Button shuffleB;
 
     private Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -65,15 +69,32 @@ public class MainActivity extends AppCompatActivity {
         songRV = findViewById(R.id.idRVSong);
         songTV = findViewById(R.id.idTVSong);
         artistTV = findViewById(R.id.idTVArtist);
+        shuffleB = findViewById(R.id.idBShuffleMain);
 
         runtimePerm();
         loadAudio();
+        updateRecycleView();
+        songListOrigin = (ArrayList<Song>) songList.clone();
 
-        songRV.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
-        songRV.setLayoutManager(layoutManager);
-        adapter = new Adapter(this, songsList);
-        songRV.setAdapter(adapter);
+        Context context = this;
+        shuffleB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (PlayerActivity.shuffle) {
+                    songList = songListOrigin;
+                    shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
+                    Toast.makeText(context, "Unsuffle", Toast.LENGTH_SHORT).show();
+                    updateRecycleView();
+                    PlayerActivity.shuffle = false;
+                } else {
+                    Collections.shuffle(songList);
+                    shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
+                    Toast.makeText(context, "Shuffle", Toast.LENGTH_SHORT).show();
+                    updateRecycleView();
+                    PlayerActivity.shuffle = true;
+                }
+            }
+        });
 
 //        searchIV.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -84,6 +105,14 @@ public class MainActivity extends AppCompatActivity {
 //                }
 //            }
 //        });
+    }
+
+    public void updateRecycleView() {
+        songRV.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(this);
+        songRV.setLayoutManager(layoutManager);
+        adapter = new Adapter(this, songList);
+        songRV.setAdapter(adapter);
     }
 
     // Check if permission is granted or not
@@ -117,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
 
         if (cursor != null && cursor.getCount() > 0) {
-            songsList = new ArrayList<>();
+            songList = new ArrayList<>();
             while (cursor.moveToNext()) {
                 @SuppressLint("Range") String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
                 @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
@@ -128,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 @SuppressLint("Range") String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
 
                 // Save to audioList
-                songsList.add(new Song(data, title, album, artist, genre, trackNum, duration));
+                songList.add(new Song(data, title, album, artist, genre, trackNum, duration));
             }
 
             cursor.close();
@@ -181,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (songRV != null) {
-            songRV.setAdapter( new Adapter(getApplicationContext(), songsList));
+            songRV.setAdapter( new Adapter(getApplicationContext(), songList));
         }
     }
 
@@ -190,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         if (!serviceBound) {
             //Store Serializable audioList to SharedPreferences
             Storage storage = new Storage(getApplicationContext());
-            storage.storeAudio(songsList);
+            storage.storeAudio(songList);
             storage.storeSongIndex(songIndex);
 
             Intent playerIntent = new Intent(this, MediaPlayerService.class);
