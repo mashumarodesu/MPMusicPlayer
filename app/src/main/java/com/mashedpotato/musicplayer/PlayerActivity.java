@@ -1,19 +1,29 @@
 package com.mashedpotato.musicplayer;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.format.Time;
+import android.util.Size;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,9 +32,10 @@ import java.util.concurrent.TimeUnit;
 
 public class PlayerActivity extends AppCompatActivity {
 
-    private TextView playingSongTV, currentTimeTV, totalTimeTV;
+    private TextView playingSongTV, artistTV, currentTimeTV, totalTimeTV;
+    private ImageView coverIV;
     private SeekBar seekBarSB;
-    private Button playB, previousB, nextB, repeatB, shuffleB;
+    private ImageButton playB, previousB, nextB, repeatB, shuffleB;
 
     // 0 is no loop
     // 1 is loop all songs
@@ -37,12 +48,15 @@ public class PlayerActivity extends AppCompatActivity {
     private Song song;
     MediaPlayer mediaPlayer = MediaPlayerService.getInstance();
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.song_player);
+        setContentView(R.layout.activity_player);
 
-        playingSongTV = findViewById(R.id.idTVSongPlaying);
+        playingSongTV = findViewById(R.id.idTVPlayingSong);
+        artistTV = findViewById(R.id.idTVArtist);
+        coverIV = findViewById(R.id.idCover);
         currentTimeTV = findViewById(R.id.idTVCurrentTime);
         totalTimeTV = findViewById(R.id.idTVTotalTime);
         seekBarSB = findViewById(R.id.idSBBar);
@@ -60,6 +74,7 @@ public class PlayerActivity extends AppCompatActivity {
         setMusic();
 
         PlayerActivity.this.runOnUiThread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.Q)
             @Override
             public void run() {
                 if (mediaPlayer != null) {
@@ -68,19 +83,16 @@ public class PlayerActivity extends AppCompatActivity {
                     currentTimeTV.setText(timeFormat.format(mediaPlayer.getCurrentPosition()));
 
                     if (mediaPlayer.isPlaying()) {
-                        playB.setBackgroundResource(R.drawable.ic_baseline_pause_24);
+                        playB.setImageResource(R.drawable.ic_baseline_pause_24);
                     } else {
-                        playB.setBackgroundResource(R.drawable.ic_baseline_play_24);
+                        playB.setImageResource(R.drawable.ic_baseline_play_24);
 
                         // About repeat mode
                         // 0 is no loop
                         // 1 is loop all
                         // 2 is loop one only
-                        if (repeatMode == 1) {
+                        if (mediaPlayer.getCurrentPosition() >= mediaPlayer.getDuration()) {
                             playNextSong();
-                        } else if (repeatMode == 2) {
-                            mediaPlayer.start();
-                            mediaPlayer.setLooping(true);
                         }
                     }
                 }
@@ -108,15 +120,27 @@ public class PlayerActivity extends AppCompatActivity {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void setMusic() {
+
+        ContentResolver contentResolver = getContentResolver();
+
         song = songList.get(MediaPlayerService.songIndex);
 
         playingSongTV.setText(song.getTitle());
+        artistTV.setText(song.getArtist());
         totalTimeTV.setText(convertTime(song.getDuration()));
 
+        try {
+            Bitmap cover = contentResolver.loadThumbnail(Uri.parse(song.getUriString()), new Size(500, 500), null);
+            coverIV.setImageBitmap(cover);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         playB.setOnClickListener(v -> pauseSong());
-        nextB.setOnClickListener(v -> playNextSong());
-        previousB.setOnClickListener(v -> playPreviousSong());
+        nextB.setOnClickListener(view -> forceNext());
+        previousB.setOnClickListener(v -> forcePrevious());
         shuffleB.setOnClickListener(v -> shuffleSong());
         repeatB.setOnClickListener(v -> repeatSong());
 
@@ -147,17 +171,17 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void repeatSong() {
         if (repeatMode == 0) {
-            repeatB.setBackgroundResource(R.drawable.ic_baseline_loop_24);  // to loop all songs
+            repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
+            repeatB.setColorFilter(Color.argb(255, 30, 215, 96));
             repeatMode = 1;
-            System.out.println(repeatMode);
         } else if (repeatMode == 1) {
-            repeatB.setBackgroundResource(R.drawable.ic_baseline_repeat_one_24);    // to loop one song
+            repeatB.setImageResource(R.drawable.ic_baseline_repeat_one_24);    // to loop one song
+            repeatB.setColorFilter(Color.argb(255, 30, 215, 96));
             repeatMode = 2;
-            System.out.println(repeatMode);
         } else if (repeatMode == 2) {
-            repeatB.setBackgroundResource(R.drawable.ic_baseline_repeat_24);    // no loop
+            repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);    // no loop
+            repeatB.setColorFilter(Color.argb(255, 67, 65, 73));
             repeatMode = 0;
-            System.out.println(repeatMode);
         }
     }
 
@@ -165,35 +189,66 @@ public class PlayerActivity extends AppCompatActivity {
         Context context = this;
         if (shuffle) {
             songList = songListOrigin;
-            shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-            Toast.makeText(context, "Unshuffle", Toast.LENGTH_SHORT).show();
+            shuffleB.setColorFilter(Color.argb(255, 67, 65, 73));
+//            Toast.makeText(context, "Unshuffle", Toast.LENGTH_SHORT).show();
             shuffle = false;
         } else {
             Collections.shuffle(songList);
-            shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-            Toast.makeText(context, "Shuffle", Toast.LENGTH_SHORT).show();
+            shuffleB.setColorFilter(Color.argb(255, 30, 215, 96));
+//            Toast.makeText(context, "Shuffle", Toast.LENGTH_SHORT).show();
             shuffle = true;
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void playNextSong() {
         if (MediaPlayerService.songIndex == songList.size() - 1) {
-           MediaPlayerService.songIndex = -1;
+            if (repeatMode == 1) {
+                MediaPlayerService.songIndex = -1;
+            } else {
+                return;
+            }
         }
 
-        MediaPlayerService.songIndex++;
+        if (repeatMode != 2) {
+            MediaPlayerService.songIndex++;
+        }
         mediaPlayer.reset();
         setMusic();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void playPreviousSong() {
         if (MediaPlayerService.songIndex == 0) {
-            MediaPlayerService.songIndex = songList.size();
+            if (repeatMode == 1) {
+                MediaPlayerService.songIndex = songList.size();
+            } else {
+                return;
+            }
         }
-
-        MediaPlayerService.songIndex--;
+        if (repeatMode != 2) {
+            MediaPlayerService.songIndex--;
+        }
         mediaPlayer.reset();
         setMusic();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void forceNext() {
+        repeatMode = 1;
+        repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
+        repeatB.setColorFilter(Color.argb(255, 30, 215, 96));
+
+        playNextSong();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void forcePrevious() {
+        repeatMode = 1;
+        repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
+        repeatB.setColorFilter(Color.argb(255, 30, 215, 96));
+
+        playPreviousSong();
     }
 
     public String convertTime(String duration) {

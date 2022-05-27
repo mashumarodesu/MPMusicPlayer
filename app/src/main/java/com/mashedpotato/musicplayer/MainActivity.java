@@ -2,6 +2,8 @@ package com.mashedpotato.musicplayer;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,10 +11,13 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
@@ -20,6 +25,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -35,6 +41,8 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -45,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<Song> songList;
     private ArrayList<Song> songListOrigin;
 
-    private RelativeLayout homeRL;
+    private ConstraintLayout homeCL;
     private TextInputEditText songEdt;
     private ImageView searchIV;
     private RecyclerView songRV;
@@ -55,15 +63,19 @@ public class MainActivity extends AppCompatActivity {
     private Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    private int PERMISSION_CODE = 1;
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.mashedpotato.musicplayer.PlayNewAudio";
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_CODE);
+        }
         setContentView(R.layout.activity_main);
 
-        homeRL = findViewById(R.id.idRLHome);
+        homeCL = findViewById(R.id.idCLHome);
         songEdt = findViewById(R.id.idEdtSong);
         searchIV = findViewById(R.id.idIVSearch);
         songRV = findViewById(R.id.idRVSong);
@@ -83,14 +95,12 @@ public class MainActivity extends AppCompatActivity {
                 if (PlayerActivity.shuffle) {
                     songList = songListOrigin;
                     shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-                    Toast.makeText(context, "Unsuffle", Toast.LENGTH_SHORT).show();
-                    updateRecycleView();
+//                    Toast.makeText(context, "Unsuffle", Toast.LENGTH_SHORT).show();
                     PlayerActivity.shuffle = false;
                 } else {
                     Collections.shuffle(songList);
                     shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-                    Toast.makeText(context, "Shuffle", Toast.LENGTH_SHORT).show();
-                    updateRecycleView();
+//                    Toast.makeText(context, "Shuffle", Toast.LENGTH_SHORT).show();
                     PlayerActivity.shuffle = true;
                 }
             }
@@ -109,9 +119,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateRecycleView() {
         songRV.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
+        layoutManager = new LinearLayoutManager(MainActivity.this);
         songRV.setLayoutManager(layoutManager);
-        adapter = new Adapter(this, songList);
+        adapter = new Adapter(MainActivity.this, songList);
         songRV.setAdapter(adapter);
     }
 
@@ -147,17 +157,35 @@ public class MainActivity extends AppCompatActivity {
 
         if (cursor != null && cursor.getCount() > 0) {
             songList = new ArrayList<>();
+
+            // Caching column indices
+            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+            int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+            int titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
+            int artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
+            int albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
+            int trackColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK);
+            int durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
+
             while (cursor.moveToNext()) {
-                @SuppressLint("Range") String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-                @SuppressLint("Range") String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                @SuppressLint("Range") String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                @SuppressLint("Range") String genre = "0";
-                @SuppressLint("Range") String trackNum = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TRACK));
-                @SuppressLint("Range") String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                long songId = cursor.getLong(idColumn);
+                String songData = cursor.getString(dataColumn);
+                String songTitle = cursor.getString(titleColumn);
+                String songArtist = cursor.getString(artistColumn);
+                String songAlbum  = cursor.getString(albumColumn);
+                String songNum = cursor.getString(trackColumn);
+                String songDuration = cursor.getString(durationColumn);
+
+                Uri songUri = ContentUris.withAppendedId(uri, songId);
+//                Bitmap songCover = null;
+//                try {
+//                    songCover = contentResolver.loadThumbnail(songUri, new Size(500, 500), null);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
 
                 // Save to audioList
-                songList.add(new Song(data, title, album, artist, genre, trackNum, duration));
+                songList.add(new Song(songData, songTitle, songAlbum, songArtist, songNum, songUri.toString(), songDuration));
             }
 
             cursor.close();

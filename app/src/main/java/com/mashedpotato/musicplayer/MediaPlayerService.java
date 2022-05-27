@@ -485,13 +485,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void updateMetaData() {
-        Bitmap albumArt = BitmapFactory.decodeResource(getResources(), R.drawable.cover); // replace with song/album cover art
+        Bitmap albumArt = BitmapFactory.decodeResource(getResources(), R.drawable.ic_cover); // replace with song/album cover art
         // Update the current metadata
         mediaSession.setMetadata(new MediaMetadataCompat.Builder()
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, activeSong.getArtist())
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, activeSong.getAlbum())
-                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, activeSong.getGenre())
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeSong.getTitle())
                 .putString(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, activeSong.getTrackNum())
                 .build());
@@ -559,7 +558,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
-                R.drawable.cover); //replace with your own image
+                R.drawable.ic_cover); //replace with your own image
 
         // Create a new Notification
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
