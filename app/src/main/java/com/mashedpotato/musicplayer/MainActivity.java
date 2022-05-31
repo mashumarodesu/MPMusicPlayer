@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -17,19 +16,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.Image;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,8 +36,6 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -84,9 +77,8 @@ public class MainActivity extends AppCompatActivity {
         shuffleB = findViewById(R.id.idBShuffleMain);
 
         runtimePerm();
-        loadAudio();
-        updateRecycleView();
-        songListOrigin = (ArrayList<Song>) songList.clone();
+        new MyAsyncTask().execute();
+//        updateRecycleView();
 
         Context context = this;
         shuffleB.setOnClickListener(new View.OnClickListener() {
@@ -95,12 +87,10 @@ public class MainActivity extends AppCompatActivity {
                 if (PlayerActivity.shuffle) {
                     songList = songListOrigin;
                     shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-//                    Toast.makeText(context, "Unsuffle", Toast.LENGTH_SHORT).show();
                     PlayerActivity.shuffle = false;
                 } else {
                     Collections.shuffle(songList);
                     shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-//                    Toast.makeText(context, "Shuffle", Toast.LENGTH_SHORT).show();
                     PlayerActivity.shuffle = true;
                 }
             }
@@ -145,6 +135,43 @@ public class MainActivity extends AppCompatActivity {
         }).check();
     }
 
+    private class MyAsyncTask extends AsyncTask<Void, Void, Void> {
+        @RequiresApi(api = Build.VERSION_CODES.R)
+        @Override
+        protected Void doInBackground(Void... params) {
+            loadAudio();
+            songListOrigin = (ArrayList<Song>) songList.clone();
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            initRecyclerView();
+        }
+    }
+
+    private void initRecyclerView() {
+        if (songList.size() > 0) {
+            songRV = findViewById(R.id.idRVSong);
+            songTV = findViewById(R.id.idTVSong);
+            artistTV = findViewById(R.id.idTVArtist);
+            Adapter adapter = new Adapter(MainActivity.this, songList);
+            songRV.setHasFixedSize(true);
+            songRV.setAdapter(adapter);
+            songRV.setLayoutManager(new LinearLayoutManager(this));
+            songRV.addOnItemTouchListener(new TouchListener(this, new onItemClickListener() {
+                @Override
+                public void onClick(View view, int index) {
+                    playAudio(index);
+                    Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                    intent.putExtra("Index", index);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    MainActivity.this.startActivity(intent);
+                }
+            }));
+
+        }
+    }
+
     // Search the storage for songs
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void loadAudio() {
@@ -177,12 +204,6 @@ public class MainActivity extends AppCompatActivity {
                 String songDuration = cursor.getString(durationColumn);
 
                 Uri songUri = ContentUris.withAppendedId(uri, songId);
-//                Bitmap songCover = null;
-//                try {
-//                    songCover = contentResolver.loadThumbnail(songUri, new Size(500, 500), null);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
 
                 // Save to audioList
                 songList.add(new Song(songData, songTitle, songAlbum, songArtist, songNum, songUri.toString(), songDuration));

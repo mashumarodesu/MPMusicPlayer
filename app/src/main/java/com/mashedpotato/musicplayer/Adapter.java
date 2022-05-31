@@ -23,17 +23,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.IOException;
 import java.util.ArrayList;
 
-interface ItemClickListener {
-    void onClick(View view, int position,boolean isLongClick);
-}
 
-class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener
-{
+class RecyclerViewHolder extends RecyclerView.ViewHolder {
     public ConstraintLayout playerCL;
     public TextView songTV, artistTV;
     public ImageView coverIV;
-
-    private ItemClickListener itemClickListener;
 
     public RecyclerViewHolder(View itemView) {
         super(itemView);
@@ -41,31 +35,13 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClick
         songTV = itemView.findViewById(R.id.idTVSong);
         artistTV = itemView.findViewById(R.id.idTVArtist);
         coverIV = itemView.findViewById(R.id.idIVCover);
-        itemView.setOnClickListener(this);
-        itemView.setOnLongClickListener(this);
-    }
-
-    public void setItemClickListener(ItemClickListener itemClickListener)
-    {
-        this.itemClickListener = itemClickListener;
-    }
-
-    @Override
-    public void onClick(View v) {
-        itemClickListener.onClick(v,getAdapterPosition(),false);
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        itemClickListener.onClick(v,getAdapterPosition(),true);
-        return true;
     }
 }
 
 
 public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
     private Context context;
-    private ArrayList<Song> songList = new ArrayList<>();
+    private ArrayList<Song> songList;
 
     public Adapter(Context context, ArrayList<Song> songList) {
         this.context = context;
@@ -96,23 +72,6 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        holder.setItemClickListener(new ItemClickListener() {
-            @Override
-            public void onClick(View view, int position, boolean isLongClick) {
-                if(isLongClick) {
-                    Toast.makeText(context, "Long Click: " + songList.get(position), Toast.LENGTH_SHORT).show();
-                } else {
-//                    Toast.makeText(context, " "+songList.get(position), Toast.LENGTH_SHORT).show();
-                    MediaPlayerService.getInstance().reset();
-                    MediaPlayerService.songIndex = position;
-                    Intent intent = new Intent(context, PlayerActivity.class);
-                    intent.putExtra("List", songList);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
-                }
-            }
-        });
     }
 
     @Override
@@ -123,5 +82,10 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
     }
 }

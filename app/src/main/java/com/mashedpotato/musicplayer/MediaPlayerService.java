@@ -492,7 +492,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, activeSong.getArtist())
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, activeSong.getAlbum())
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeSong.getTitle())
-                .putString(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, activeSong.getTrackNum())
+//                .putString(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, activeSong.getTrackNum())
                 .build());
     }
 
