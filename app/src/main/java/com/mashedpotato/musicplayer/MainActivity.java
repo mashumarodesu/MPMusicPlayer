@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View view, int index) {
                     playAudio(index);
                     Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                    intent.putExtra("Index", index);
+                    intent.putExtra("List", songList);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     MainActivity.this.startActivity(intent);
                 }
