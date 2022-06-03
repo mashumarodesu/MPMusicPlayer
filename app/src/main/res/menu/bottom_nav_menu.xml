@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/idBNVISongs"
+        android:enabled="true"
+        android:icon="@drawable/ic_music_note"
+        android:title="Songs" />
+    <item
+        android:id="@+id/idBNVIArtists"
+        android:enabled="true"
+        android:icon="@drawable/ic_artist"
+        android:title="Artists" />
+    <item
+        android:id="@+id/idBNVIAlbums"
+        android:enabled="true"
+        android:icon="@drawable/ic_album"
+        android:title="Albums" />
+    <item
+        android:id="@+id/idBNVIPlaylists"
+        android:enabled="true"
+        android:icon="@drawable/ic_playlist"
+        android:title="Playlists" />
+</menu>

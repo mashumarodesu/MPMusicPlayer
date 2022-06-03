@@ -1,5 +1,6 @@
 package com.mashedpotato.musicplayer;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -22,12 +23,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView songRV;
     private TextView songTV, artistTV;
     private Button shuffleB;
+    private BottomNavigationView bottomNavigationView;
 
     private Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -75,12 +79,33 @@ public class MainActivity extends AppCompatActivity {
         songTV = findViewById(R.id.idTVSong);
         artistTV = findViewById(R.id.idTVArtist);
         shuffleB = findViewById(R.id.idBShuffleMain);
+        bottomNavigationView = findViewById(R.id.idBNVNavigation);
 
         runtimePerm();
         new MyAsyncTask().execute();
 //        updateRecycleView();
 
-        Context context = this;
+        bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.idBNVISongs:
+
+                        break;
+                    case R.id.idBNVIArtists:
+
+                        break;
+                    case R.id.idBNVIAlbums:
+
+                        break;
+                    case R.id.idBNVIPlaylists:
+
+                        break;
+                }
+                return true;
+            }
+        });
+
         shuffleB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
