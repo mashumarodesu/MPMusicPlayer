@@ -35,17 +35,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
         AudioManager.OnAudioFocusChangeListener {
 
-    public static MediaPlayer instance;
+    public static MediaPlayer mediaPlayer;
 
-    public static MediaPlayer getInstance() {
-        if (instance == null) {
-            instance = new MediaPlayer();
+    public static MediaPlayer getMediaPlayer() {
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
         }
-        return instance;
+        return mediaPlayer;
     }
 
     private static final String CHANNEL_ID = "mpNotiPlayer";
-    private MediaPlayer mediaPlayer;
+//    private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
 
     private int resumePos;

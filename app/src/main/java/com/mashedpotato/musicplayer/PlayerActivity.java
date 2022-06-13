@@ -40,7 +40,7 @@ public class PlayerActivity extends AppCompatActivity {
     private ArrayList<Song> songList;
     private ArrayList<Song> songListOrigin;
     private Song song;
-    MediaPlayer mediaPlayer = MediaPlayerService.getInstance();
+    MediaPlayer mediaPlayer = MediaPlayerService.getMediaPlayer();
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
@@ -125,12 +125,12 @@ public class PlayerActivity extends AppCompatActivity {
         artistTV.setText(song.getArtist());
         totalTimeTV.setText(convertTime(song.getDuration()));
 
-        try {
-            Bitmap cover = contentResolver.loadThumbnail(Uri.parse(song.getUriString()), new Size(500, 500), null);
-            coverIV.setImageBitmap(cover);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Bitmap cover = contentResolver.loadThumbnail(Uri.parse(song.getUriString()), new Size(500, 500), null);
+//            coverIV.setImageBitmap(cover);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         playB.setOnClickListener(v -> pauseSong());
         nextB.setOnClickListener(view -> forceNext());
