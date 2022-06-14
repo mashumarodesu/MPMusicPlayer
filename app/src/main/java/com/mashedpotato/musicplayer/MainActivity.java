@@ -3,6 +3,8 @@ package com.mashedpotato.musicplayer;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,10 +25,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,7 +59,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageView searchIV;
     private RecyclerView songRV;
     private TextView songTV, artistTV;
-    private Button shuffleB;
+    private Button shuffleB, searchB;
+    private Toolbar toolbarTB;
+    private SearchView searchSV;
     private BottomNavigationView bottomNavigationView;
 
     private Adapter adapter;
@@ -73,17 +80,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         homeCL = findViewById(R.id.idCLHome);
-        songEdt = findViewById(R.id.idEdtSong);
-        searchIV = findViewById(R.id.idIVSearch);
         songRV = findViewById(R.id.idRVSong);
         songTV = findViewById(R.id.idTVSong);
         artistTV = findViewById(R.id.idTVArtist);
         shuffleB = findViewById(R.id.idBShuffleMain);
+//        searchB = findViewById(R.id.idBSearch);
+        toolbarTB = findViewById(R.id.idTBBar);
+        searchSV = findViewById(R.id.idSVSearch);
         bottomNavigationView = findViewById(R.id.idBNVNavigation);
 
         runtimePerm();
         new MyAsyncTask().execute();
-//        updateRecycleView();
 
         bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
             @Override
@@ -121,23 +128,48 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        searchIV.setOnClickListener(new View.OnClickListener() {
+//        searchB.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                String song = songEdt.getText().toString();
-//                if(song.isEmpty()) {
-//                    Toast.makeText(MainActivity.this, "Enter a song here >:^l", Toast.LENGTH_SHORT).show();
-//                }
+//                PopupMenu popup = new PopupMenu(MainActivity.this, view);
+//                MenuInflater inflater = popup.getMenuInflater();
+//                inflater.inflate(R.menu.search_menu, popup.getMenu());
+//                popup.show();
 //            }
 //        });
     }
 
-    public void updateRecycleView() {
-        songRV.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(MainActivity.this);
-        songRV.setLayoutManager(layoutManager);
-        adapter = new Adapter(MainActivity.this, songList);
-        songRV.setAdapter(adapter);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.search_menu, menu);
+        MenuItem menuItem = menu.findItem(R.id.idMenuSearch);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setQueryHint("Why this shit doesnt work");
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                adapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.idMenuSearch) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // Check if permission is granted or not
@@ -179,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
             songRV = findViewById(R.id.idRVSong);
             songTV = findViewById(R.id.idTVSong);
             artistTV = findViewById(R.id.idTVArtist);
-            Adapter adapter = new Adapter(MainActivity.this, songList);
+            adapter = new Adapter(MainActivity.this, songList);
             songRV.setHasFixedSize(true);
             songRV.setAdapter(adapter);
             songRV.setLayoutManager(new LinearLayoutManager(this));
@@ -193,8 +225,28 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.startActivity(intent);
                 }
             }));
-
         }
+
+        searchSV.setQueryHint("Is this work?");
+        searchSV.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String text) {
+                if (adapter != null) {
+                    adapter.getFilter().filter(text);
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String text) {
+                if (adapter != null) {
+                    adapter.getFilter().filter(text);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     // Search the storage for songs

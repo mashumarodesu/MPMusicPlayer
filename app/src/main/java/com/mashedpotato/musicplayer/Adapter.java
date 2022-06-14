@@ -11,6 +11,8 @@ import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,13 +41,15 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder {
 }
 
 
-public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
+public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> implements Filterable {
     private Context context;
-    private ArrayList<Song> songList;
+    private ArrayList<Song> songList;   // origin
+    private ArrayList<Song> songListFiltered;   // call ra
 
     public Adapter(Context context, ArrayList<Song> songList) {
         this.context = context;
         this.songList = songList;
+        this.songListFiltered = songList;
     }
 
     @NonNull
@@ -62,7 +66,7 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
         ContentResolver contentResolver = context.getContentResolver();
 
-        Song song = songList.get(position);
+        Song song = songListFiltered.get(position);
         holder.songTV.setText(song.getTitle());
         holder.artistTV.setText(song.getArtist());
 
@@ -75,9 +79,46 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> {
     }
 
     @Override
+    public Filter getFilter() throws NullPointerException {
+        Filter filter = new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                if (charString.isEmpty()) {
+                    songListFiltered = songList;
+                } else {
+                    ArrayList<Song> listFiltered = new ArrayList<>();
+                    for (Song song : songList) {
+                        // in case of misunderstanding
+                        // if (name match something something)
+                        if (song.getTitle().toLowerCase().contains(charString.toLowerCase()) ||
+                                song.getArtist().toLowerCase().contains(charString.toLowerCase()) ||
+                                song.getAlbum().toLowerCase().contains(charString.toLowerCase())) {
+                            listFiltered.add(song);
+                        }
+                    }
+
+                    songListFiltered = listFiltered;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = songListFiltered;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                songListFiltered = (ArrayList<Song>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
+        return filter;
+    }
+
+    @Override
     public int getItemCount() {
         try {
-            return songList.size();
+            return songListFiltered.size();
         } catch (NullPointerException e) {
             e.printStackTrace();
             return 0;
