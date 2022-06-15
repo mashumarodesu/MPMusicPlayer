@@ -166,15 +166,15 @@ public class PlayerActivity extends AppCompatActivity {
     private void repeatSong() {
         if (repeatMode == 0) {
             repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
-            repeatB.setColorFilter(Color.argb(255, 30, 215, 96));
+            repeatB.setColorFilter(R.color.accent1);
             repeatMode = 1;
         } else if (repeatMode == 1) {
             repeatB.setImageResource(R.drawable.ic_baseline_repeat_one_24);    // to loop one song
-            repeatB.setColorFilter(Color.argb(255, 30, 215, 96));
+            repeatB.setColorFilter(R.color.accent1);
             repeatMode = 2;
         } else if (repeatMode == 2) {
             repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);    // no loop
-            repeatB.setColorFilter(Color.argb(255, 67, 65, 73));
+            repeatB.setColorFilter(R.color.accent2);
             repeatMode = 0;
         }
     }

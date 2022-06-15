@@ -132,11 +132,11 @@
             android:id="@+id/idBPrevious"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_toStartOf="@id/idBPlay"
             android:layout_marginHorizontal="10dp"
+            android:layout_toStartOf="@id/idBPlay"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_baseline_skip_previous_24"
-            app:tint="@color/accent0" />
+            app:tint="@color/accent1" />
 
         <ImageButton
             android:id="@+id/idBPlay"
@@ -146,7 +146,7 @@
             android:layout_marginHorizontal="10dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_baseline_pause_24"
-            app:tint="@color/accent0" />
+            app:tint="@color/accent1" />
 
         <ImageButton
             android:id="@+id/idBNext"
@@ -156,7 +156,7 @@
             android:layout_marginHorizontal="10dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_baseline_skip_next_24"
-            app:tint="@color/accent0" />
+            app:tint="@color/accent1" />
 
         <ImageButton
             android:id="@+id/idBRepeat"
