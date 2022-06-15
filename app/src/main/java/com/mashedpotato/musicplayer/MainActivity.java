@@ -8,6 +8,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -55,21 +56,18 @@ public class MainActivity extends AppCompatActivity {
     boolean serviceBound = false;
     public ArrayList<Song> songList;
     private ArrayList<Song> songListOrigin;
-    private ArrayList<ArrayList<Song>> playlistList;
 
-    private ConstraintLayout homeCL;
-    private TextInputEditText songEdt;
-    private ImageButton searchIB, menuIB;
+    private ImageButton menuIB;
     private RecyclerView songRV;
     private TextView songTV, artistTV;
-    private Button shuffleB, searchB;
+    private Button shuffleB;
     private Toolbar toolbarTB;
     private SearchView searchSV;
 
     private BottomNavigationView bottomNavigationView;
 
     private Adapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
+    private Storage storage;
 
     private int PERMISSION_CODE = 1;
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.mashedpotato.musicplayer.PlayNewAudio";
@@ -83,8 +81,6 @@ public class MainActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_main);
 
-        homeCL = findViewById(R.id.idCLHome);
-        searchIB = findViewById(R.id.idIBSearch);
         menuIB = findViewById(R.id.idIBMenu);
         songRV = findViewById(R.id.idRVSong);
         shuffleB = findViewById(R.id.idBShuffleMain);
@@ -92,16 +88,14 @@ public class MainActivity extends AppCompatActivity {
         searchSV = findViewById(R.id.idSVSearch);
         bottomNavigationView = findViewById(R.id.idBNVNavigation);
 
+        ImageView searchIcon = searchSV.findViewById(androidx.appcompat.R.id.search_button);
+        searchIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_search_24));
+
         runtimePerm();
+        storage = new Storage(getApplicationContext());
         new MyAsyncTask().execute();
 
-
-        menuIB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showOptionsMenu(v);
-            }
-        });
+        menuIB.setOnClickListener(this::showOptionsMenu);
 
         bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
             @Override
@@ -132,16 +126,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-//        searchB.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                PopupMenu popup = new PopupMenu(MainActivity.this, view);
-//                MenuInflater inflater = popup.getMenuInflater();
-//                inflater.inflate(R.menu.search_menu, popup.getMenu());
-//                popup.show();
-//            }
-//        });
     }
 
     @Override
@@ -149,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.search_menu, menu);
         MenuItem menuItem = menu.findItem(R.id.idMenuSearch);
         SearchView searchView = (SearchView) menuItem.getActionView();
-        searchView.setQueryHint("Why this shit doesnt work");
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -202,12 +185,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             loadAudio();
-            songListOrigin = (ArrayList<Song>) songList.clone();
             return null;
         }
         @Override
         protected void onPostExecute(Void result) {
             initSongRecyclerView();
+            songListOrigin = (ArrayList<Song>) songList.clone();
+            storage.storeAudio(songList);
         }
     }
 
@@ -225,14 +209,13 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View view, int index) {
                     playAudio(index);
                     Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                    intent.putExtra("List", songList);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     MainActivity.this.startActivity(intent);
                 }
             }));
         }
 
-        searchSV.setQueryHint("Is this work?");
+//        searchSV.setQueryHint("Is this work?");
         searchSV.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String text) {
@@ -346,6 +329,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playAudio(int songIndex) {
+
+        Intent playerIntent = new Intent(this, MediaPlayerService.class);
+
         //Check is service is active
         if (!serviceBound) {
             //Store Serializable audioList to SharedPreferences
@@ -353,7 +339,6 @@ public class MainActivity extends AppCompatActivity {
             storage.storeAudio(songList);
             storage.storeSongIndex(songIndex);
 
-            Intent playerIntent = new Intent(this, MediaPlayerService.class);
             startService(playerIntent);
             bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         } else {

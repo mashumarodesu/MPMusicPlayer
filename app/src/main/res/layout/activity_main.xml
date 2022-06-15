@@ -9,23 +9,21 @@
     tools:context="com.mashedpotato.musicplayer.MainActivity">
 
     <androidx.appcompat.widget.Toolbar
+        android:id="@+id/idTBBar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:id="@+id/idTBBar"
+        android:layout_marginTop="5dp"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/Theme.AppCompat.DayNight.DarkActionBar">
 
-        <RelativeLayout
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/idSVSearch"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            app:iconifiedByDefault="true"
+            app:searchIcon="@drawable/ic_baseline_search_24" />
 
-            <androidx.appcompat.widget.SearchView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/idSVSearch"
-                android:layoutDirection="rtl"/>
-
-        </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -36,18 +34,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
-
-    <ImageButton
-        android:id="@+id/idIBSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_baseline_search_24"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/accent0" />
 
     <ImageButton
         android:id="@+id/idIBMenu"
@@ -76,7 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="70dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:orientation="vertical"

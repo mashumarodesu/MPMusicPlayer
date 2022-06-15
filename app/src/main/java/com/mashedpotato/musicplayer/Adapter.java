@@ -70,12 +70,12 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> implements
         holder.songTV.setText(song.getTitle());
         holder.artistTV.setText(song.getArtist());
 
-//        try {
-//            Bitmap cover = contentResolver.loadThumbnail(Uri.parse(song.getUriString()), new Size(500, 500), null);
-//            holder.coverIV.setImageBitmap(cover);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            Bitmap cover = contentResolver.loadThumbnail(Uri.parse(song.getUriString()), new Size(500, 500), null);
+            holder.coverIV.setImageBitmap(cover);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
