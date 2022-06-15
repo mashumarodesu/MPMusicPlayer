@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +31,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -53,15 +55,17 @@ public class MainActivity extends AppCompatActivity {
     boolean serviceBound = false;
     public ArrayList<Song> songList;
     private ArrayList<Song> songListOrigin;
+    private ArrayList<ArrayList<Song>> playlistList;
 
     private ConstraintLayout homeCL;
     private TextInputEditText songEdt;
-    private ImageView searchIV;
+    private ImageButton searchIB, menuIB;
     private RecyclerView songRV;
     private TextView songTV, artistTV;
     private Button shuffleB, searchB;
     private Toolbar toolbarTB;
     private SearchView searchSV;
+
     private BottomNavigationView bottomNavigationView;
 
     private Adapter adapter;
@@ -80,11 +84,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         homeCL = findViewById(R.id.idCLHome);
+        searchIB = findViewById(R.id.idIBSearch);
+        menuIB = findViewById(R.id.idIBMenu);
         songRV = findViewById(R.id.idRVSong);
-        songTV = findViewById(R.id.idTVSong);
-        artistTV = findViewById(R.id.idTVArtist);
         shuffleB = findViewById(R.id.idBShuffleMain);
-//        searchB = findViewById(R.id.idBSearch);
         toolbarTB = findViewById(R.id.idTBBar);
         searchSV = findViewById(R.id.idSVSearch);
         bottomNavigationView = findViewById(R.id.idBNVNavigation);
@@ -92,18 +95,20 @@ public class MainActivity extends AppCompatActivity {
         runtimePerm();
         new MyAsyncTask().execute();
 
+
+        menuIB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showOptionsMenu(v);
+            }
+        });
+
         bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.idBNVISongs:
-
-                        break;
-                    case R.id.idBNVIArtists:
-
-                        break;
-                    case R.id.idBNVIAlbums:
-
+                        initSongRecyclerView();
                         break;
                     case R.id.idBNVIPlaylists:
 
@@ -202,11 +207,11 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         protected void onPostExecute(Void result) {
-            initRecyclerView();
+            initSongRecyclerView();
         }
     }
 
-    private void initRecyclerView() {
+    private void initSongRecyclerView() {
         if (songList.size() > 0) {
             songRV = findViewById(R.id.idRVSong);
             songTV = findViewById(R.id.idTVSong);
@@ -361,5 +366,46 @@ public class MainActivity extends AppCompatActivity {
             Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
             sendBroadcast(broadcastIntent);
         }
+    }
+
+    public void showOptionsMenu(View view) {
+
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        MenuInflater menuInflater = popupMenu.getMenuInflater();
+        menuInflater.inflate(R.menu.recycle_view_menu, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                // Theme
+                case R.id.idLightTheme:
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    item.setChecked(!item.isChecked());
+                    break;
+                case R.id.idDarkTheme:
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    item.setChecked(!item.isChecked());
+                    break;
+                // Sorting category
+                case R.id.idTitleSort:
+                    item.setChecked(!item.isChecked());
+                    break;
+                case R.id.idArtistSort:
+                    item.setChecked(!item.isChecked());
+                    break;
+                case R.id.idAlbumSort:
+                    item.setChecked(!item.isChecked());
+                    break;
+                // Sorting order
+                case R.id.idAscending:
+                    item.setChecked(!item.isChecked());
+                    break;
+                case R.id.idDescending:
+                    item.setChecked(!item.isChecked());
+                    break;
+            }
+            return true;
+        });
+
+        popupMenu.show();
     }
 }

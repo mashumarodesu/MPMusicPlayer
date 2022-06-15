@@ -29,10 +29,13 @@
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/progress_bar.xml" value="0.2435" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/layout/activity_main.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/layout/activity_player.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/layout/fragment_artist.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/layout/fragment_song.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/layout/song_cardview.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/layout/song_list.xml" value="0.20878623188405798" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/layout/song_player.xml" value="0.25" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/menu/bottom_nav_menu.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/menu/recycle_view_menu.xml" value="0.25416666666666665" />
       </map>
     </option>
   </component>
