@@ -1,13 +1,12 @@
 package com.mashedpotato.musicplayer;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,42 +14,48 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Size;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GestureDetectorCompat;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends AppCompatActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
 
     MediaPlayerService mService;
     boolean mBound = false;
+
+    private GestureDetectorCompat gestureDetector;
 
     public static boolean needUpdate = true;
 
     private TextView playingSongTV, artistTV, currentTimeTV, totalTimeTV;
     private ImageView coverIV;
     private SeekBar seekBarSB;
-    private ImageButton playB, previousB, nextB, repeatB, shuffleB;
+    private ImageButton playB, previousB, nextB, repeatB, shuffleB, backB;
 
     // 0 is no loop
     // 1 is loop all songs
     // 2 is loop one only
-    private int repeatMode = 0;
+    public static int repeatMode = 0;
     public static boolean shuffle = false;
 
     private Song song;
-//    MediaPlayer mediaPlayer = MediaPlayerService.getMediaPlayer();
 
+    private static final int SWIPE_MIN_DISTANCE = 120;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
+    @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +73,16 @@ public class PlayerActivity extends AppCompatActivity {
         nextB = findViewById(R.id.idBNext);
         repeatB = findViewById(R.id.idBRepeat);
         shuffleB = findViewById(R.id.idBShuffle);
+        backB = findViewById(R.id.idIBMain);
 
         playingSongTV.setSelected(true);
 
-//        songList = (ArrayList<Song>) getIntent().getSerializableExtra("List");
-//        songListOrigin = (ArrayList<Song>) songList.clone();
+        backB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goBack();
+            }
+        });
 
         setMusic();
 
@@ -118,6 +128,16 @@ public class PlayerActivity extends AppCompatActivity {
 
             }
         });
+
+        this.gestureDetector = new GestureDetectorCompat(this, this);
+        gestureDetector.setOnDoubleTapListener(this);
+
+        coverIV.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+        });
     }
 
     @Override
@@ -131,9 +151,23 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
 
         unbindService(serviceConnection);
         mBound = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Intent intent = new Intent(this, MediaPlayerService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        mBound = true;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -165,10 +199,10 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void resetSeekBar() {
-        seekBarSB.setProgress(0);
         seekBarSB.setMax(MediaPlayerService.mediaPlayer.getDuration());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void pauseSong() {
         mService.toggleMedia();
     }
@@ -176,15 +210,15 @@ public class PlayerActivity extends AppCompatActivity {
     private void repeatSong() {
         if (repeatMode == 0) {
             repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
-            repeatB.setColorFilter(R.color.accent1);
+            repeatB.setColorFilter(R.color.accent3);
             repeatMode = 1;
         } else if (repeatMode == 1) {
             repeatB.setImageResource(R.drawable.ic_baseline_repeat_one_24);    // to loop one song
-            repeatB.setColorFilter(R.color.accent1);
+            repeatB.setColorFilter(R.color.accent3);
             repeatMode = 2;
         } else if (repeatMode == 2) {
             repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);    // no loop
-            repeatB.setColorFilter(R.color.accent2);
+            repeatB.setColorFilter(R.color.accent1);
             repeatMode = 0;
         }
     }
@@ -192,11 +226,11 @@ public class PlayerActivity extends AppCompatActivity {
     private void shuffleSong() {
         if (shuffle) {
             mService.shuffleSong(false);
-            shuffleB.setColorFilter(Color.argb(255, 67, 65, 73));
+            shuffleB.setColorFilter(R.color.accent1);
             shuffle = false;
         } else {
             mService.shuffleSong(true);
-            shuffleB.setColorFilter(Color.argb(255, 30, 215, 96));
+            shuffleB.setColorFilter(R.color.accent3);
             shuffle = true;
         }
     }
@@ -205,12 +239,10 @@ public class PlayerActivity extends AppCompatActivity {
     private void forceNext() {
         if (repeatMode == 2) {
             repeatMode = 1;
-//            repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
-//            repeatB.setColorFilter(Color.argb(255, 30, 215, 96));
+            repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
         }
 
         mService.skipToNext();
-//        MediaPlayerService.mediaPlayer.reset();
         setMusic();
     }
 
@@ -218,13 +250,17 @@ public class PlayerActivity extends AppCompatActivity {
     private void forcePrevious() {
         if (repeatMode == 2) {
             repeatMode = 1;
-//            repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
-//            repeatB.setColorFilter(Color.argb(255, 30, 215, 96));
+            repeatB.setImageResource(R.drawable.ic_baseline_repeat_24);  // to loop all songs
         }
 
         mService.skipToPrevious();
-//        MediaPlayerService.mediaPlayer.reset();
         setMusic();
+    }
+
+    private void goBack() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        PlayerActivity.this.startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
     }
 
     public String convertTime(String duration) {
@@ -250,4 +286,61 @@ public class PlayerActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e) {
+        return false;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public boolean onDoubleTap(MotionEvent e) {
+        pauseSong();
+        return true;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent e) {
+        return true;
+    }
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return true;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+            forceNext();
+        }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+            forcePrevious();
+        }
+
+        if(e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+            goBack();
+        }
+
+        return true;
+    }
 }

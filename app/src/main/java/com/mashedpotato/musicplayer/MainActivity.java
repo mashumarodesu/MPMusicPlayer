@@ -1,17 +1,5 @@
 package com.mashedpotato.musicplayer;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -35,11 +23,19 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
-import android.widget.TextView;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.textfield.TextInputEditText;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -57,19 +53,15 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<Song> songList;
     private ArrayList<Song> songListOrigin;
 
-    private ImageButton menuIB;
     private RecyclerView songRV;
-    private TextView songTV, artistTV;
     private Button shuffleB;
-    private Toolbar toolbarTB;
     private SearchView searchSV;
 
-    private BottomNavigationView bottomNavigationView;
+    private int sortCategory = 0, sortOrder = 0;
 
     private Adapter adapter;
     private Storage storage;
 
-    private int PERMISSION_CODE = 1;
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.mashedpotato.musicplayer.PlayNewAudio";
 
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -77,16 +69,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            int PERMISSION_CODE = 1;
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_CODE);
         }
         setContentView(R.layout.activity_main);
 
-        menuIB = findViewById(R.id.idIBMenu);
+        ImageButton menuIB = findViewById(R.id.idIBMenu);
         songRV = findViewById(R.id.idRVSong);
         shuffleB = findViewById(R.id.idBShuffleMain);
-        toolbarTB = findViewById(R.id.idTBBar);
         searchSV = findViewById(R.id.idSVSearch);
-        bottomNavigationView = findViewById(R.id.idBNVNavigation);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.idBNVNavigation);
+        ImageButton playerIB = findViewById(R.id.idIBPlayer);
 
         ImageView searchIcon = searchSV.findViewById(androidx.appcompat.R.id.search_button);
         searchIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_search_24));
@@ -97,34 +90,35 @@ public class MainActivity extends AppCompatActivity {
 
         menuIB.setOnClickListener(this::showOptionsMenu);
 
-        bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.idBNVISongs:
-                        initSongRecyclerView();
-                        break;
-                    case R.id.idBNVIPlaylists:
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.idBNVISongs:
+                    initSongRecyclerView();
+                    break;
+                case R.id.idBNVIPlaylists:
 
-                        break;
-                }
-                return true;
+                    break;
+            }
+            return true;
+        });
+
+        shuffleB.setOnClickListener(view -> {
+            if (PlayerActivity.shuffle) {
+                songList = songListOrigin;
+                shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
+                PlayerActivity.shuffle = false;
+
+            } else {
+                Collections.shuffle(songList);
+                shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
+                PlayerActivity.shuffle = true;
             }
         });
 
-        shuffleB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (PlayerActivity.shuffle) {
-                    songList = songListOrigin;
-                    shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-                    PlayerActivity.shuffle = false;
-                } else {
-                    Collections.shuffle(songList);
-                    shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-                    PlayerActivity.shuffle = true;
-                }
-            }
+        playerIB.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
+            MainActivity.this.startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
         });
     }
 
@@ -133,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.search_menu, menu);
         MenuItem menuItem = menu.findItem(R.id.idMenuSearch);
         SearchView searchView = (SearchView) menuItem.getActionView();
-
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -187,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
             loadAudio();
             return null;
         }
+
         @Override
         protected void onPostExecute(Void result) {
             initSongRecyclerView();
@@ -198,24 +192,43 @@ public class MainActivity extends AppCompatActivity {
     private void initSongRecyclerView() {
         if (songList.size() > 0) {
             songRV = findViewById(R.id.idRVSong);
-            songTV = findViewById(R.id.idTVSong);
-            artistTV = findViewById(R.id.idTVArtist);
+            Collections.sort(songList, (o1, o2) -> {
+
+                int sortResult = 0;
+
+                switch (sortCategory) {
+                    case 0:
+                        sortResult = o1.getTitle().compareToIgnoreCase(o2.getTitle());
+                        break;
+                    case 1:
+                        sortResult = o1.getArtist().compareToIgnoreCase(o2.getArtist());
+                        break;
+                    case 2:
+                        sortResult = o1.getAlbum().compareToIgnoreCase(o2.getAlbum());
+                        break;
+                }
+
+                switch (sortOrder) {
+                    case 0:
+                        return sortResult;
+                    case 1:
+                        return -sortResult;
+                }
+                return 0;
+            });
             adapter = new Adapter(MainActivity.this, songList);
             songRV.setHasFixedSize(true);
             songRV.setAdapter(adapter);
             songRV.setLayoutManager(new LinearLayoutManager(this));
-            songRV.addOnItemTouchListener(new TouchListener(this, new onItemClickListener() {
-                @Override
-                public void onClick(View view, int index) {
-                    playAudio(index);
-                    Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    MainActivity.this.startActivity(intent);
-                }
+            songRV.addOnItemTouchListener(new TouchListener(this, (view, index) -> {
+                playAudio(index);
+                Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                MainActivity.this.startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
             }));
         }
 
-//        searchSV.setQueryHint("Is this work?");
         searchSV.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String text) {
@@ -264,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 String songData = cursor.getString(dataColumn);
                 String songTitle = cursor.getString(titleColumn);
                 String songArtist = cursor.getString(artistColumn);
-                String songAlbum  = cursor.getString(albumColumn);
+                String songAlbum = cursor.getString(albumColumn);
                 String songNum = cursor.getString(trackColumn);
                 String songDuration = cursor.getString(durationColumn);
 
@@ -324,7 +337,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (songRV != null) {
-            songRV.setAdapter( new Adapter(getApplicationContext(), songList));
+            songRV.setAdapter(new Adapter(getApplicationContext(), songList));
         }
     }
 
@@ -333,9 +346,9 @@ public class MainActivity extends AppCompatActivity {
         Intent playerIntent = new Intent(this, MediaPlayerService.class);
 
         //Check is service is active
+        Storage storage = new Storage(getApplicationContext());
         if (!serviceBound) {
             //Store Serializable audioList to SharedPreferences
-            Storage storage = new Storage(getApplicationContext());
             storage.storeAudio(songList);
             storage.storeSongIndex(songIndex);
 
@@ -343,7 +356,6 @@ public class MainActivity extends AppCompatActivity {
             bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         } else {
             //Store the new audioIndex to SharedPreferences
-            Storage storage = new Storage(getApplicationContext());
             storage.storeSongIndex(songIndex);
 
             //Service is active
@@ -360,34 +372,34 @@ public class MainActivity extends AppCompatActivity {
         menuInflater.inflate(R.menu.recycle_view_menu, popupMenu.getMenu());
 
         popupMenu.setOnMenuItemClickListener(item -> {
+            RadioButton rb;
             switch (item.getItemId()) {
                 // Theme
                 case R.id.idLightTheme:
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    item.setChecked(!item.isChecked());
                     break;
                 case R.id.idDarkTheme:
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                    item.setChecked(!item.isChecked());
                     break;
                 // Sorting category
                 case R.id.idTitleSort:
-                    item.setChecked(!item.isChecked());
+                    sortCategory = 0;
                     break;
                 case R.id.idArtistSort:
-                    item.setChecked(!item.isChecked());
+                    sortCategory = 1;
                     break;
                 case R.id.idAlbumSort:
-                    item.setChecked(!item.isChecked());
+                    sortCategory = 2;
                     break;
                 // Sorting order
                 case R.id.idAscending:
-                    item.setChecked(!item.isChecked());
+                    sortOrder = 0;
                     break;
                 case R.id.idDescending:
-                    item.setChecked(!item.isChecked());
+                    sortOrder = 1;
                     break;
             }
+            initSongRecyclerView();
             return true;
         });
 

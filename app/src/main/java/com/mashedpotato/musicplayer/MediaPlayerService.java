@@ -175,26 +175,24 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void toggleMedia() {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
+            buildNotification(PlaybackStatus.PAUSED);
             resumePos = mediaPlayer.getCurrentPosition();
         } else {
             mediaPlayer.seekTo(resumePos);
             mediaPlayer.start();
+            buildNotification(PlaybackStatus.PLAYING);
         }
     }
 
-    public void repeatMedia(int repeatMode) {
-
-    }
-
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         // Invoked when playback of a media source has completed
-        stopMedia();
-        // Stop the service
-        stopSelf();
+        skipToNext();
     }
 
     @Override
@@ -369,6 +367,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         // Start listening for CallState changes
         phoneStateListener = new PhoneStateListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onCallStateChanged(int state, String incomingNumber) {
                 switch (state) {
