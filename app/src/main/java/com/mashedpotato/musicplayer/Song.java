@@ -20,6 +20,7 @@ public class Song implements Serializable {
     private String trackNum;
     private String uriString;
     private String duration;
+    private boolean isFavorite;
 
     public Song(String data, String title, String album, String artist, String trackNum, String uriString, String duration) {
         this.data = data;
@@ -29,6 +30,7 @@ public class Song implements Serializable {
         this.trackNum = trackNum;
         this.uriString = uriString;
         this.duration = duration;
+        this.isFavorite = false;
     }
 
     public String getData() {
@@ -87,4 +89,11 @@ public class Song implements Serializable {
         this.duration = duration;
     }
 
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
+    }
 }

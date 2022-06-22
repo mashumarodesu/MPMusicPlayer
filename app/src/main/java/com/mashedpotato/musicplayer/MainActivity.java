@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     boolean serviceBound = false;
     public ArrayList<Song> songList;
     private ArrayList<Song> songListOrigin;
-    private ArrayList<ArrayList<Song>> playlistList;
+    public static ArrayList<Song> songListFavorite = new ArrayList<>();
 
     private ConstraintLayout homeCL;
     private TextInputEditText songEdt;
@@ -108,10 +108,14 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.idBNVISongs:
-                        initSongRecyclerView();
+                        adapter = new Adapter(MainActivity.this, songListOrigin);
+                        songRV.setAdapter(adapter);
                         break;
                     case R.id.idBNVIPlaylists:
-
+                        if (songListFavorite != null) {
+                            adapter = new Adapter(MainActivity.this, songListFavorite);
+                            songRV.setAdapter(adapter);
+                        }
                         break;
                 }
                 return true;
@@ -132,16 +136,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-//        searchB.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                PopupMenu popup = new PopupMenu(MainActivity.this, view);
-//                MenuInflater inflater = popup.getMenuInflater();
-//                inflater.inflate(R.menu.search_menu, popup.getMenu());
-//                popup.show();
-//            }
-//        });
     }
 
     @Override
@@ -203,6 +197,11 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             loadAudio();
             songListOrigin = (ArrayList<Song>) songList.clone();
+            for (Song song : songList) {
+                if (song.isFavorite()) {
+                    songListFavorite.add(song);
+                }
+            }
             return null;
         }
         @Override
@@ -293,6 +292,16 @@ public class MainActivity extends AppCompatActivity {
 
             cursor.close();
         }
+
+        Storage storage = new Storage(getApplicationContext());
+        if (storage.loadSongFav() != null) {
+            for (Song song : songList) {
+                if (storage.loadSongFav().contains(song)) {
+                    song.setFavorite(true);
+                }
+            }
+        }
+
     }
 
     // Bind this client to the AudioPlayer Service

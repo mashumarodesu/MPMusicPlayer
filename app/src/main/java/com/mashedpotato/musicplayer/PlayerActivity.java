@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Size;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -29,7 +30,7 @@ public class PlayerActivity extends AppCompatActivity {
     private TextView playingSongTV, artistTV, currentTimeTV, totalTimeTV;
     private ImageView coverIV;
     private SeekBar seekBarSB;
-    private ImageButton playB, previousB, nextB, repeatB, shuffleB;
+    private ImageButton favoriteB, playB, previousB, nextB, repeatB, shuffleB;
 
     // 0 is no loop
     // 1 is loop all songs
@@ -39,6 +40,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     private ArrayList<Song> songList;
     private ArrayList<Song> songListOrigin;
+//    private ArrayList<Song> songListFavorite = new ArrayList<>();
     private Song song;
     MediaPlayer mediaPlayer = MediaPlayerService.getMediaPlayer();
 
@@ -54,6 +56,7 @@ public class PlayerActivity extends AppCompatActivity {
         currentTimeTV = findViewById(R.id.idTVCurrentTime);
         totalTimeTV = findViewById(R.id.idTVTotalTime);
         seekBarSB = findViewById(R.id.idSBBar);
+        favoriteB = findViewById(R.id.idBFavorite);
         playB = findViewById(R.id.idBPlay);
         previousB = findViewById(R.id.idBPrevious);
         nextB = findViewById(R.id.idBNext);
@@ -112,6 +115,7 @@ public class PlayerActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -124,6 +128,31 @@ public class PlayerActivity extends AppCompatActivity {
         playingSongTV.setText(song.getTitle());
         artistTV.setText(song.getArtist());
         totalTimeTV.setText(convertTime(song.getDuration()));
+
+        if (MainActivity.songListFavorite.contains(song)) {
+            favoriteB.setImageResource(R.drawable.ic_baseline_favorite_24);
+        } else {
+            favoriteB.setImageResource(R.drawable.ic_baseline_not_favorite_24);
+        }
+
+        Storage storage = new Storage(getApplicationContext());
+
+        favoriteB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (song.isFavorite()) {
+                    song.setFavorite(false);
+                    favoriteB.setImageResource(R.drawable.ic_baseline_not_favorite_24);
+                    MainActivity.songListFavorite.remove(song);
+                    storage.storeSongFav(MainActivity.songListFavorite);
+                } else {
+                    song.setFavorite(true);
+                    favoriteB.setImageResource(R.drawable.ic_baseline_favorite_24);
+                    MainActivity.songListFavorite.add(song);
+                    storage.storeSongFav(MainActivity.songListFavorite);
+                }
+            }
+        });
 
 //        try {
 //            Bitmap cover = contentResolver.loadThumbnail(Uri.parse(song.getUriString()), new Size(500, 500), null);
