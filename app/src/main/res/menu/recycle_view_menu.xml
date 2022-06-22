@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:title="Theme"
+        app:showAsAction="never" >
+
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/idLightTheme"
+                    android:title="Light" />
+                <item
+                    android:id="@+id/idDarkTheme"
+                    android:title="Dark" />
+            </group>
+        </menu>
+
+    </item>
+
+    <item
+        android:title="Sort by"
+        app:showAsAction="never" >
+
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/idTitleSort"
+                    android:title="Title" />
+                <item
+                    android:id="@+id/idArtistSort"
+                    android:title="Artist" />
+                <item
+                    android:id="@+id/idAlbumSort"
+                    android:title="Album" />
+            </group>
+
+            <group android:checkableBehavior="single">
+                <item
+                    android:title="Sorting order"
+                    android:checkable="false"
+                    android:enabled="false" />
+                <item
+                    android:id="@+id/idAscending"
+                    android:title="Ascending" />
+                <item
+                    android:id="@+id/idDescending"
+                    android:title="Descending" />
+            </group>
+
+        </menu>
+    </item>
+
+</menu>

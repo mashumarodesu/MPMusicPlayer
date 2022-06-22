@@ -9,10 +9,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="dark">#292D36</color>
 
-    <color name="background">#FFFBFE</color>
-    <color name="background1">#F1E9FE</color>
-    <color name="accent0">#1C1B1F</color>
-    <color name="accent1">#757375</color>
-    <color name="accent2">#dbd8da</color>
+    <color name="background">#202124</color>
+    <color name="background1">#292A2E</color>
+    <color name="accent0">#FFFFFF</color>
+    <color name="accent1">#C1BCC7</color>
+    <color name="accent2">#434149</color>
     <color name="accent3">#1ed760</color>
 </resources>

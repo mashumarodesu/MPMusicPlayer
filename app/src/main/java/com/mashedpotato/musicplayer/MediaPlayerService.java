@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -14,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.session.MediaSessionManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -24,20 +26,30 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.Size;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
-
         AudioManager.OnAudioFocusChangeListener {
 
+    public static MediaPlayer mediaPlayer;
+
+    public static MediaPlayer getMediaPlayer() {
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+        }
+        return mediaPlayer;
+    }
+
     private static final String CHANNEL_ID = "mpNotiPlayer";
-    private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
 
     private int resumePos;
@@ -51,8 +63,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private final IBinder iBinder = new LocalBinder();
 
     // List of available Audio files
+    public static int songIndex = -1; // song position
     private ArrayList<Song> songList;
-    private int songIndex = -1;
+    private ArrayList<Song> songListOriginal;
     private Song activeSong; // currently playing song
 
     // Media control
@@ -69,6 +82,22 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     //AudioPlayer notification ID
     private static final int NOTIFICATION_ID = 101;
+
+    public ArrayList<Song> getSongList() {
+        return this.songList;
+    }
+
+    public void setSongList(ArrayList<Song> songList) {
+        this.songList = songList;
+    }
+
+    public Song getActiveSong() {
+        return activeSong;
+    }
+
+    public void setActiveSong(Song activeSong) {
+        this.activeSong = activeSong;
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -133,7 +162,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         mediaPlayer.prepareAsync();
     }
 
-    private void playMedia() {
+    public void playMedia() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
         }
@@ -146,26 +175,24 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
-    private void pauseMedia() {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void toggleMedia() {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
+            buildNotification(PlaybackStatus.PAUSED);
             resumePos = mediaPlayer.getCurrentPosition();
-        }
-    }
-
-    private void resumeMedia() {
-        if (!mediaPlayer.isPlaying()) {
+        } else {
             mediaPlayer.seekTo(resumePos);
             mediaPlayer.start();
+            buildNotification(PlaybackStatus.PLAYING);
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         // Invoked when playback of a media source has completed
-        stopMedia();
-        // Stop the service
-        stopSelf();
+        skipToNext();
     }
 
     @Override
@@ -234,14 +261,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     // Handles the initialization of the MediaPlayer and the focus request to make sure there are no other apps playing media
     public int onStartCommand(Intent intent, int flags, int startId) {
         try {
             // Load data from SharedPreferences
             Storage storage = new Storage(getApplicationContext());
-            songList = storage.loadSong();
+            songListOriginal = storage.loadSong();
+            songList = songListOriginal;
             songIndex = storage.loadSongIndex();
 
             if (songIndex != -1 && songIndex < songList.size()) {
@@ -285,7 +313,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             stopMedia();
             mediaPlayer.release();
         }
-        removeAudioFocus();
+//        removeAudioFocus();
 
         // Disable the PhoneStateListener
         if (phoneStateListener != null) {
@@ -322,7 +350,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         @Override
         public void onReceive(Context context, Intent intent) {
             // Pause audio on ACTION_AUDIO_BECOMING_NOISY
-            pauseMedia();
+            toggleMedia();
             buildNotification(PlaybackStatus.PAUSED);
         }
     };
@@ -339,6 +367,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         // Start listening for CallState changes
         phoneStateListener = new PhoneStateListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onCallStateChanged(int state, String incomingNumber) {
                 switch (state) {
@@ -347,7 +376,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     case TelephonyManager.CALL_STATE_OFFHOOK:
                     case TelephonyManager.CALL_STATE_RINGING:
                         if (mediaPlayer != null) {
-                            pauseMedia();
+                            toggleMedia();
                             ongoingCall = true;
                         }
                         break;
@@ -356,7 +385,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         if (mediaPlayer != null) {
                             if (ongoingCall) {
                                 ongoingCall = false;
-                                resumeMedia();
+                                toggleMedia();
                             }
                         }
                         break;
@@ -369,12 +398,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private BroadcastReceiver playNewAudio = new BroadcastReceiver() {
-        @RequiresApi(api = Build.VERSION_CODES.O)
+        @RequiresApi(api = Build.VERSION_CODES.Q)
         @Override
         public void onReceive(Context context, Intent intent) {
 
             // Get the new media index form SharedPreferences
-            songIndex = new Storage(getApplicationContext()).loadSongIndex();
+            Storage storage = new Storage(getApplicationContext());
+            Log.d("idk", Integer.toString(storage.loadSongIndex()));
+            songIndex = storage.loadSongIndex();
             if (songIndex != -1 && songIndex < songList.size()) {
                 // If index is in a valid range
                 activeSong = songList.get(songIndex);
@@ -397,6 +428,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         registerReceiver(playNewAudio, filter);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void initMediaSession() throws RemoteException {
         if (mediaSessionManager != null) return; // A mediaSessionManager already exists
 
@@ -423,7 +455,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             @Override
             public void onPlay() {
                 super.onPlay();
-                resumeMedia();
+                toggleMedia();
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
@@ -431,26 +463,28 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             @Override
             public void onPause() {
                 super.onPause();
-                pauseMedia();
+                toggleMedia();
                 buildNotification(PlaybackStatus.PAUSED);
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.O)
+            @RequiresApi(api = Build.VERSION_CODES.Q)
             @Override
             public void onSkipToNext() {
                 super.onSkipToNext();
                 skipToNext();
                 updateMetaData();
                 buildNotification(PlaybackStatus.PLAYING);
+                PlayerActivity.needUpdate = true;
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.O)
+            @RequiresApi(api = Build.VERSION_CODES.Q)
             @Override
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
                 skipToPrevious();
                 updateMetaData();
                 buildNotification(PlaybackStatus.PLAYING);
+                PlayerActivity.needUpdate = true;
             }
 
             @Override
@@ -468,27 +502,37 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void updateMetaData() {
-        Bitmap albumArt = BitmapFactory.decodeResource(getResources(), R.drawable.cover); // replace with song/album cover art
-        // Update the current metadata
-        mediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, activeSong.getArtist())
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, activeSong.getAlbum())
-                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, activeSong.getGenre())
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeSong.getTitle())
-                .putString(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, activeSong.getTrackNum())
-                .build());
+
+        ContentResolver contentResolver = getContentResolver();
+
+        try {
+
+            Bitmap albumArt = contentResolver.loadThumbnail(Uri.parse(activeSong.getUriString()), new Size(500, 500), null);
+
+            // Update the current metadata
+            mediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, activeSong.getArtist())
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, activeSong.getAlbum())
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeSong.getTitle())
+//                .putString(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, activeSong.getTrackNum())
+                    .build());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void skipToNext() {
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    public void skipToNext() {
         if (songIndex == songList.size() - 1) {
             // If current song is the last in playlist, set index to the first song
             songIndex = 0;
             activeSong = songList.get(songIndex);
         } else {
             // Get next in playlist
-            activeSong = songList.get(++songIndex);
+            activeSong = songList.get(songIndex++);
         }
 
         // Update stored index
@@ -497,17 +541,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         stopMedia();
         // Reset mediaPlayer
         mediaPlayer.reset();
+        updateMetaData();
         initMediaPlayer();
+        buildNotification(PlaybackStatus.PLAYING);
     }
 
-    private void skipToPrevious() {
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    public void skipToPrevious() {
         if (songIndex == 0) {
             // If current song is the first in playlist, set index to the last song
             songIndex = songList.size() - 1;
             activeSong = songList.get(songIndex);
         } else {
             // Get previous in playlist
-            activeSong = songList.get(--songIndex);
+            activeSong = songList.get(songIndex--);
         }
 
         // Update stored index
@@ -516,7 +563,22 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         stopMedia();
         // Reset mediaPlayer
         mediaPlayer.reset();
+        updateMetaData();
         initMediaPlayer();
+        buildNotification(PlaybackStatus.PLAYING);
+    }
+
+    public void shuffleSong(boolean isShuffle) {
+
+        Storage storage = new Storage(getApplicationContext());
+
+        if (isShuffle) {
+            Collections.shuffle(songList);
+            storage.storeAudio(songList);
+        } else {
+            songList = songListOriginal;
+            storage.storeAudio(songList);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -543,7 +605,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
-                R.drawable.cover); //replace with your own image
+                R.drawable.ic_cover); //replace with your own image
 
         // Create a new Notification
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
