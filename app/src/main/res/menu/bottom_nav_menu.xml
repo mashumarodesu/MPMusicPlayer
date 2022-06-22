@@ -5,19 +5,9 @@
         android:enabled="true"
         android:icon="@drawable/ic_music_note"
         android:title="Songs" />
-<!--    <item-->
-<!--        android:id="@+id/idBNVIArtists"-->
-<!--        android:enabled="true"-->
-<!--        android:icon="@drawable/ic_artist"-->
-<!--        android:title="Artists" />-->
-<!--    <item-->
-<!--        android:id="@+id/idBNVIAlbums"-->
-<!--        android:enabled="true"-->
-<!--        android:icon="@drawable/ic_album"-->
-<!--        android:title="Albums" />-->
     <item
-        android:id="@+id/idBNVIPlaylists"
+        android:id="@+id/idBNVIFavorite"
         android:enabled="true"
-        android:icon="@drawable/ic_playlist"
-        android:title="Playlists" />
+        android:icon="@drawable/ic_baseline_favorite_24"
+        android:title="Favorite" />
 </menu>

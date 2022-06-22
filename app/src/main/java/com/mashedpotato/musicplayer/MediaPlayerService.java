@@ -532,7 +532,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             activeSong = songList.get(songIndex);
         } else {
             // Get next in playlist
-            activeSong = songList.get(++songIndex);
+            activeSong = songList.get(songIndex++);
         }
 
         // Update stored index
@@ -554,7 +554,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             activeSong = songList.get(songIndex);
         } else {
             // Get previous in playlist
-            activeSong = songList.get(--songIndex);
+            activeSong = songList.get(songIndex--);
         }
 
         // Update stored index

@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
     public static ArrayList<Song> songListFavorite = new ArrayList<>();
 
     private RecyclerView songRV;
-    private Button shuffleB;
     private SearchView searchSV;
 
     private int sortCategory = 0, sortOrder = 0;
@@ -77,9 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
         ImageButton menuIB = findViewById(R.id.idIBMenu);
         songRV = findViewById(R.id.idRVSong);
-        shuffleB = findViewById(R.id.idBShuffleMain);
         searchSV = findViewById(R.id.idSVSearch);
-        BottomNavigationView bottomNavigationView = findViewById(R.id.idBNVNavigation);
         ImageButton playerIB = findViewById(R.id.idIBPlayer);
 
         ImageView searchIcon = searchSV.findViewById(androidx.appcompat.R.id.search_button);
@@ -90,47 +87,6 @@ public class MainActivity extends AppCompatActivity {
         new MyAsyncTask().execute();
 
         menuIB.setOnClickListener(this::showOptionsMenu);
-
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.idBNVISongs:
-                    initSongRecyclerView();
-                    break;
-                case R.id.idBNVIPlaylists:
-
-                    break;
-            }
-            return true;
-        });
-
-        bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.idBNVISongs:
-                        adapter = new Adapter(MainActivity.this, songListOrigin);
-                        songRV.setAdapter(adapter);
-                        break;
-                    case R.id.idBNVIPlaylists:
-                        if (songListFavorite != null) {
-                            adapter = new Adapter(MainActivity.this, songListFavorite);
-                            songRV.setAdapter(adapter);
-                        }
-                        break;
-                }
-                return true;
-        shuffleB.setOnClickListener(view -> {
-            if (PlayerActivity.shuffle) {
-                songList = songListOrigin;
-                shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-                PlayerActivity.shuffle = false;
-
-            } else {
-                Collections.shuffle(songList);
-                shuffleB.setBackgroundResource(R.drawable.ic_baseline_shuffle_24);
-                PlayerActivity.shuffle = true;
-            }
-        });
 
         playerIB.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);

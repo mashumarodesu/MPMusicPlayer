@@ -23,7 +23,9 @@
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/cover.xml" value="0.2535" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/ic_album.xml" value="0.2595" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/ic_artist.xml" value="0.2595" />
+        <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/ic_baseline_favorite_24.xml" value="0.2595" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/ic_baseline_loop_24.xml" value="0.2515" />
+        <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/ic_baseline_not_favorite_24.xml" value="0.2595" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.2595" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/ic_cover.xml" value="0.2535" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/drawable/ic_music_note.xml" value="0.2595" />
@@ -39,6 +41,7 @@
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/menu/bottom_nav_menu.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/menu/recycle_view_menu.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/menu/search_menu.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/Mashumaro/AndroidStudioProjects/MPMusicPlayer/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.124" />
       </map>
     </option>
   </component>

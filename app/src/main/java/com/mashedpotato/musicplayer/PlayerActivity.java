@@ -28,6 +28,7 @@ import androidx.core.view.GestureDetectorCompat;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class PlayerActivity extends AppCompatActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
@@ -42,7 +43,11 @@ public class PlayerActivity extends AppCompatActivity implements GestureDetector
     private TextView playingSongTV, artistTV, currentTimeTV, totalTimeTV;
     private ImageView coverIV;
     private SeekBar seekBarSB;
-    private ImageButton favoriteB, playB, previousB, nextB, repeatB, shuffleB, backB;
+    private ImageButton playB;
+    private ImageButton previousB;
+    private ImageButton nextB;
+    private ImageButton repeatB;
+    private ImageButton shuffleB;
 
     // 0 is no loop
     // 1 is loop all songs
@@ -50,9 +55,6 @@ public class PlayerActivity extends AppCompatActivity implements GestureDetector
     public static int repeatMode = 0;
     public static boolean shuffle = false;
 
-    private ArrayList<Song> songList;
-    private ArrayList<Song> songListOrigin;
-//    private ArrayList<Song> songListFavorite = new ArrayList<>();
     private Song song;
 
     private static final int SWIPE_MIN_DISTANCE = 120;
@@ -71,13 +73,12 @@ public class PlayerActivity extends AppCompatActivity implements GestureDetector
         currentTimeTV = findViewById(R.id.idTVCurrentTime);
         totalTimeTV = findViewById(R.id.idTVTotalTime);
         seekBarSB = findViewById(R.id.idSBBar);
-        favoriteB = findViewById(R.id.idBFavorite);
         playB = findViewById(R.id.idBPlay);
         previousB = findViewById(R.id.idBPrevious);
         nextB = findViewById(R.id.idBNext);
         repeatB = findViewById(R.id.idBRepeat);
         shuffleB = findViewById(R.id.idBShuffle);
-        backB = findViewById(R.id.idIBMain);
+        ImageButton backB = findViewById(R.id.idIBMain);
 
         playingSongTV.setSelected(true);
 
@@ -186,30 +187,28 @@ public class PlayerActivity extends AppCompatActivity implements GestureDetector
         artistTV.setText(song.getArtist());
         totalTimeTV.setText(convertTime(song.getDuration()));
 
-        if (MainActivity.songListFavorite.contains(song)) {
-            favoriteB.setImageResource(R.drawable.ic_baseline_favorite_24);
-        } else {
-            favoriteB.setImageResource(R.drawable.ic_baseline_not_favorite_24);
-        }
+//        if (MainActivity.songListFavorite.contains(song)) {
+//            favoriteB.setImageResource(R.drawable.ic_baseline_favorite_24);
+//        } else {
+//            favoriteB.setImageResource(R.drawable.ic_baseline_favorite_border_24);
+//        }
 
-        Storage storage = new Storage(getApplicationContext());
-
-        favoriteB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (song.isFavorite()) {
-                    song.setFavorite(false);
-                    favoriteB.setImageResource(R.drawable.ic_baseline_not_favorite_24);
-                    MainActivity.songListFavorite.remove(song);
-                    storage.storeSongFav(MainActivity.songListFavorite);
-                } else {
-                    song.setFavorite(true);
-                    favoriteB.setImageResource(R.drawable.ic_baseline_favorite_24);
-                    MainActivity.songListFavorite.add(song);
-                    storage.storeSongFav(MainActivity.songListFavorite);
-                }
-            }
-        });
+//        storage = new Storage(getApplicationContext());
+//
+//        Storage finalStorage = storage;
+//        favoriteB.setOnClickListener(view -> {
+//            if (song.isFavorite()) {
+//                song.setFavorite(false);
+//                favoriteB.setImageResource(R.drawable.ic_baseline_favorite_border_24);
+//                MainActivity.songListFavorite.remove(song);
+//                finalStorage.storeSongFav(MainActivity.songListFavorite);
+//            } else {
+//                song.setFavorite(true);
+//                favoriteB.setImageResource(R.drawable.ic_baseline_favorite_24);
+//                MainActivity.songListFavorite.add(song);
+//                finalStorage.storeSongFav(MainActivity.songListFavorite);
+//            }
+//        });
 
         try {
             Bitmap cover = contentResolver.loadThumbnail(Uri.parse(song.getUriString()), new Size(500, 500), null);

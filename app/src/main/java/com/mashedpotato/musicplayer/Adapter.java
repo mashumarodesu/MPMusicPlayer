@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ public class Adapter extends RecyclerView.Adapter<RecyclerViewHolder> implements
     private Context context;
     private ArrayList<Song> songList;   // origin
     private ArrayList<Song> songListFiltered;   // call ra
+    private ArrayList<Song> favorites;
 
     public Adapter(Context context, ArrayList<Song> songList) {
         this.context = context;
