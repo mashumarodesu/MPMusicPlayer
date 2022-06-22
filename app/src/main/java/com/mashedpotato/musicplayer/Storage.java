@@ -49,6 +49,23 @@ public class Storage {
         return preferences.getInt("audioIndex", -1);//return -1 if no data found
     }
 
+    public void storeSongFav(ArrayList<Song> favList) {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(favList);
+        editor.putString("favList", json);
+        editor.apply();
+    }
+
+    public ArrayList<Song> loadSongFav() {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = preferences.getString("favList", null);
+        Type type = new TypeToken<ArrayList<Song>>() {}.getType();
+        return gson.fromJson(json, type);
+    }
+
     public void clearCachedPlaylist() {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();

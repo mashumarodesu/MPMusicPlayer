@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     boolean serviceBound = false;
     public ArrayList<Song> songList;
     private ArrayList<Song> songListOrigin;
+    public static ArrayList<Song> songListFavorite = new ArrayList<>();
 
     private RecyclerView songRV;
     private Button shuffleB;
@@ -102,6 +103,22 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.idBNVISongs:
+                        adapter = new Adapter(MainActivity.this, songListOrigin);
+                        songRV.setAdapter(adapter);
+                        break;
+                    case R.id.idBNVIPlaylists:
+                        if (songListFavorite != null) {
+                            adapter = new Adapter(MainActivity.this, songListFavorite);
+                            songRV.setAdapter(adapter);
+                        }
+                        break;
+                }
+                return true;
         shuffleB.setOnClickListener(view -> {
             if (PlayerActivity.shuffle) {
                 songList = songListOrigin;
@@ -178,6 +195,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             loadAudio();
+            songListOrigin = (ArrayList<Song>) songList.clone();
+            for (Song song : songList) {
+                if (song.isFavorite()) {
+                    songListFavorite.add(song);
+                }
+            }
             return null;
         }
 
@@ -289,6 +312,16 @@ public class MainActivity extends AppCompatActivity {
 
             cursor.close();
         }
+
+        Storage storage = new Storage(getApplicationContext());
+        if (storage.loadSongFav() != null) {
+            for (Song song : songList) {
+                if (storage.loadSongFav().contains(song)) {
+                    song.setFavorite(true);
+                }
+            }
+        }
+
     }
 
     // Bind this client to the AudioPlayer Service
