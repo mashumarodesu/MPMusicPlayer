@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".MediaPlayerService" />
+        <service android:enabled="true" android:name="com.mashedpotato.musicplayer.MediaPlayerService" />
     </application>
 
 </manifest>
